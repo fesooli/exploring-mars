@@ -1,4 +1,4 @@
-package br.com.fellipeoliveira.exploringmars.domains;
+package br.com.fellipeoliveira.exploringmars.gateways.http.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Direction {
+public class DirectionDTO {
 
   private int positionX;
 

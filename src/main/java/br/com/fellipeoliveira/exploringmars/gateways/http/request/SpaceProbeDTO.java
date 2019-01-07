@@ -1,4 +1,4 @@
-package br.com.fellipeoliveira.exploringmars.domains;
+package br.com.fellipeoliveira.exploringmars.gateways.http.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SpaceProbe {
+public class SpaceProbeDTO {
 
   private String probeId;
 
   private String spaceProbeName;
 
-  private Direction direction;
+  private DirectionDTO directionDTO;
 
 }
