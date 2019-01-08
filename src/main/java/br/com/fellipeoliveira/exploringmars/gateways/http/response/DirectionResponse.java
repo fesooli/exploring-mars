@@ -1,4 +1,4 @@
-package br.com.fellipeoliveira.exploringmars.gateways.http.request;
+package br.com.fellipeoliveira.exploringmars.gateways.http.response;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DirectionDTO {
+public class DirectionResponse {
 
   @Min(value = 0, message = "PositionX can not be less than zero!")
   @Max(value = 9, message = "PositionX can not be greater than nine!")

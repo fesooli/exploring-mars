@@ -1,7 +1,10 @@
 package br.com.fellipeoliveira.exploringmars.usecases;
 
-import br.com.fellipeoliveira.exploringmars.gateways.http.request.ProbeDTO;
-import br.com.fellipeoliveira.exploringmars.gateways.http.request.SpaceProbeDTO;
+import br.com.fellipeoliveira.exploringmars.config.PlanetConfig;
+import br.com.fellipeoliveira.exploringmars.domains.SpaceProbe;
+import br.com.fellipeoliveira.exploringmars.exceptions.MaxNumberOfProbesValidationException;
+import br.com.fellipeoliveira.exploringmars.exceptions.PositionValidationException;
+import br.com.fellipeoliveira.exploringmars.gateways.http.request.ProbeRequest;
 import br.com.fellipeoliveira.exploringmars.util.ValidationUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -14,39 +17,54 @@ import org.springframework.stereotype.Component;
 public class ValidationUseCase {
 
   private final ValidationUtil validationUtil;
+  private final PlanetConfig planetConfig;
 
-  public void execute(SpaceProbeDTO spaceProbeDTO, List<SpaceProbeDTO> spaceProbes) {
-    validationUtil.validate(spaceProbeDTO);
-    validationUtil.validate(spaceProbeDTO.getDirectionDTO());
+  public void execute(SpaceProbe spaceProbe, List<SpaceProbe> spaceProbes) {
+    // validationUtil.validate(spaceProbe);
+    // validationUtil.validate(spaceProbeRequest.getDirectionDTO());
+    validatePosition(spaceProbes, spaceProbe);
+    validateLimitPositions(spaceProbe);
+  }
 
+  public void execute(ProbeRequest probeRequest, List<SpaceProbe> spaceProbes) {
+    validationUtil.validate(probeRequest);
     validateMaximumNumberOfProbes(spaceProbes);
-    validatePosition(
-        spaceProbes,
-        spaceProbeDTO.getDirectionDTO().getPositionY(),
-        spaceProbeDTO.getDirectionDTO().getPositionX());
   }
 
-  public void execute(ProbeDTO probeDTO) {
-    validationUtil.validate(probeDTO);
-  }
-
-  private void validateMaximumNumberOfProbes(List<SpaceProbeDTO> spaceProbes) {
-    if (spaceProbes.size() == 5) {
-      throw new RuntimeException("O limite máximo de sondas ao mesmo tempo é 5.");
+  private void validateMaximumNumberOfProbes(List<SpaceProbe> spaceProbes) {
+    if (spaceProbes.size() == planetConfig.getMaxNumberOfProbes()) {
+      throw new MaxNumberOfProbesValidationException(
+          "O limite máximo de sondas ao mesmo tempo é " + planetConfig.getMaxNumberOfProbes());
     }
   }
 
-  private void validatePosition(List<SpaceProbeDTO> spaceProbes, int positionY, int positionX) {
+  private void validatePosition(List<SpaceProbe> spaceProbes, SpaceProbe spaceProbe) {
     spaceProbes
         .stream()
         .filter(
-            spaceProbeDTO ->
-                spaceProbeDTO.getDirectionDTO().getPositionX() == positionX
-                    && spaceProbeDTO.getDirectionDTO().getPositionY() == positionY)
+            spaceProbeRequest ->
+                !spaceProbeRequest.getProbeId().equalsIgnoreCase(spaceProbe.getProbeId())
+                    && spaceProbeRequest.getDirection().getPositionX()
+                        == spaceProbe.getDirection().getPositionX()
+                    && spaceProbeRequest.getDirection().getPositionY()
+                        == spaceProbe.getDirection().getPositionY())
         .findFirst()
         .ifPresent(
-            spaceProbeDTO -> {
-              throw new RuntimeException("Já existe uma sonda nessa posição de Y,X.");
+            spaceProbeRequest -> {
+              throw new PositionValidationException("Já existe uma sonda nessa posição de X, Y.");
             });
+  }
+
+  private void validateLimitPositions(SpaceProbe spaceProbe) {
+    if ((spaceProbe.getDirection().getPositionX() < 0
+            || spaceProbe.getDirection().getPositionY() < 0)
+        || (spaceProbe.getDirection().getPositionX() > planetConfig.getMaxPositionX()
+            || spaceProbe.getDirection().getPositionY() > planetConfig.getMaxPositionY())) {
+      throw new PositionValidationException(
+          "Os limites minimos de X e Y foram ultrapassados. X="
+              + spaceProbe.getDirection().getPositionX()
+              + ", Y="
+              + spaceProbe.getDirection().getPositionY());
+    }
   }
 }

@@ -1,15 +1,19 @@
 package br.com.fellipeoliveira.exploringmars.usecases;
 
+import br.com.fellipeoliveira.exploringmars.config.PlanetConfig;
 import br.com.fellipeoliveira.exploringmars.domains.Direction;
 import br.com.fellipeoliveira.exploringmars.domains.SpaceProbe;
+import br.com.fellipeoliveira.exploringmars.exceptions.PlanetLimitAreaValidationException;
 import br.com.fellipeoliveira.exploringmars.gateways.SpaceProbeGateway;
-import br.com.fellipeoliveira.exploringmars.gateways.http.request.DirectionDTO;
-import br.com.fellipeoliveira.exploringmars.gateways.http.request.ProbeDTO;
-import br.com.fellipeoliveira.exploringmars.gateways.http.request.SpaceProbeDTO;
+import br.com.fellipeoliveira.exploringmars.gateways.http.request.ProbeRequest;
+import br.com.fellipeoliveira.exploringmars.gateways.http.request.SpaceProbeRequest;
+import br.com.fellipeoliveira.exploringmars.gateways.http.response.DirectionResponse;
+import br.com.fellipeoliveira.exploringmars.gateways.http.response.SpaceProbeResponse;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,87 +22,83 @@ public class SpaceProbeUseCase {
 
   private final SpaceProbeGateway spaceProbeGateway;
   private final ValidationUseCase validationUseCase;
+  private final PlanetConfig planetConfig;
+  private final ApplicationContext context;
 
-  public List<SpaceProbeDTO> findAllProbes() {
+  public List<SpaceProbeResponse> findAllProbes() {
     return spaceProbeGateway
         .findAllProbes()
         .stream()
-        .map(spaceProbe -> builderSpaceProbeDTO(spaceProbe))
+        .map(spaceProbe -> builderSpaceProbeResponse(spaceProbe))
         .collect(Collectors.toList());
   }
 
-  public SpaceProbeDTO findProbeById(String id) {
-    return builderSpaceProbeDTO(spaceProbeGateway.findProbeById(id));
+  public SpaceProbeResponse findProbeById(String id) {
+    return builderSpaceProbeResponse(spaceProbeGateway.findProbeById(id));
   }
 
-  public void saveProbe(ProbeDTO probeDTO) {
-    validationUseCase.execute(probeDTO);
-    final List<SpaceProbeDTO> spaceProbes = findAllProbes();
-    // Criar validação para a sonda só andar 1 campo por vez e não permitir teleportes
-
-    final SpaceProbeDTO spaceProbeDTO =
-        SpaceProbeDTO.builder()
-            .probeId(UUID.randomUUID().toString())
-            .spaceProbeName(probeDTO.getSpaceProbeName())
-            .directionDTO(findValidProbeLocationInPlanet(spaceProbes))
-            .build();
-    spaceProbeGateway.saveProbe(builderSpaceProbe(spaceProbeDTO));
+  public void saveProbe(ProbeRequest probeRequest) {
+    final List<SpaceProbe> spaceProbes = spaceProbeGateway.findAllProbes();
+    validationUseCase.execute(probeRequest, spaceProbes);
+    final SpaceProbe spaceProbe = createSpaceProbe(probeRequest.getSpaceProbeName(), spaceProbes);
+    validationUseCase.execute(spaceProbe, spaceProbes);
+    saveProbe(spaceProbe);
   }
 
-  public void updateProbeLocation(SpaceProbeDTO spaceProbeDTO) {
-    spaceProbeGateway.updateProbeDirection(builderSpaceProbe(spaceProbeDTO));
+  public void updateProbeLocation(SpaceProbeRequest spaceProbeRequest) {
+    spaceProbeRequest
+        .getTurns()
+        .forEach(turn -> ((Command) context.getBean(turn)).execute(spaceProbeRequest.getProbeId()));
   }
 
-  private DirectionDTO findValidProbeLocationInPlanet(List<SpaceProbeDTO> spaceProbes) {
+  private void saveProbe(SpaceProbe spaceProbe) {
+    spaceProbeGateway.saveProbe(spaceProbe);
+  }
+
+  private Direction findValidProbeLocationInPlanet(List<SpaceProbe> spaceProbes) {
     int positionY = 0;
     int positionX = 0;
 
     for (int i = 0; i < spaceProbes.size(); i++) {
-      if (positionX <= 9) {
-        if (spaceProbes.get(i).getDirectionDTO().getPositionY() == positionY) {
-          if (spaceProbes.get(i).getDirectionDTO().getPositionX() == positionX) {
-            positionX += 2;
+      if (positionX <= planetConfig.getMaxPositionX()) {
+        if (spaceProbes.get(i).getDirection().getPositionY() == positionY) {
+          if (spaceProbes.get(i).getDirection().getPositionX() == positionX) {
+            positionX += planetConfig.getDistancePositions();
           } else {
             break;
           }
         }
       } else {
-        throw new RuntimeException("Foi excedido o limite máximo de X.");
+        throw new PlanetLimitAreaValidationException("Foi excedido o limite máximo de X.");
       }
     }
-    return DirectionDTO.builder()
+
+    return Direction.builder()
         .positionX(positionX)
         .positionY(positionY)
         .probeDirection("N")
+        .angle(1)
         .build();
   }
 
-  private SpaceProbe builderSpaceProbe(SpaceProbeDTO spaceProbe) {
+  private SpaceProbe createSpaceProbe(String spaceProbeName, List<SpaceProbe> spaceProbes) {
     return SpaceProbe.builder()
+        .probeId(UUID.randomUUID().toString())
+        .spaceProbeName(spaceProbeName)
+        .direction(findValidProbeLocationInPlanet(spaceProbes))
+        .build();
+  }
+
+  private SpaceProbeResponse builderSpaceProbeResponse(SpaceProbe spaceProbe) {
+    return SpaceProbeResponse.builder()
         .probeId(spaceProbe.getProbeId())
         .spaceProbeName(spaceProbe.getSpaceProbeName())
-        .direction(builderSpaceProbeDirection(spaceProbe.getDirectionDTO()))
+        .directionResponse(builderSpaceProbeDirectionResponse(spaceProbe.getDirection()))
         .build();
   }
 
-  private Direction builderSpaceProbeDirection(DirectionDTO direction) {
-    return Direction.builder()
-        .positionX(direction.getPositionX())
-        .positionY(direction.getPositionY())
-        .probeDirection(direction.getProbeDirection())
-        .build();
-  }
-
-  private SpaceProbeDTO builderSpaceProbeDTO(SpaceProbe spaceProbe) {
-    return SpaceProbeDTO.builder()
-        .probeId(spaceProbe.getProbeId())
-        .spaceProbeName(spaceProbe.getSpaceProbeName())
-        .directionDTO(builderSpaceProbeDirectionDTO(spaceProbe.getDirection()))
-        .build();
-  }
-
-  private DirectionDTO builderSpaceProbeDirectionDTO(Direction direction) {
-    return DirectionDTO.builder()
+  private DirectionResponse builderSpaceProbeDirectionResponse(Direction direction) {
+    return DirectionResponse.builder()
         .positionX(direction.getPositionX())
         .positionY(direction.getPositionY())
         .probeDirection(direction.getProbeDirection())

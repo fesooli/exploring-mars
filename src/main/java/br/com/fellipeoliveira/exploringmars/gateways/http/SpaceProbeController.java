@@ -2,7 +2,8 @@ package br.com.fellipeoliveira.exploringmars.gateways.http;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import br.com.fellipeoliveira.exploringmars.gateways.http.request.SpaceProbeDTO;
+import br.com.fellipeoliveira.exploringmars.gateways.http.request.ProbeRequest;
+import br.com.fellipeoliveira.exploringmars.gateways.http.request.SpaceProbeRequest;
 import br.com.fellipeoliveira.exploringmars.usecases.SpaceProbeUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,17 +40,17 @@ public class SpaceProbeController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public ResponseEntity createProbe(@RequestBody final SpaceProbeDTO spaceProbeDTO) {
+  public ResponseEntity createProbe(@RequestBody final ProbeRequest probeRequest) {
     log.info("RECEIVED ON CREATE PROBE METHOD");
-    spaceProbeUseCase.saveProbe(spaceProbeDTO);
+    spaceProbeUseCase.saveProbe(probeRequest);
     return ResponseEntity.ok().body(spaceProbeUseCase.findAllProbes());
   }
 
   @PutMapping
   @ResponseStatus(HttpStatus.OK)
-  public ResponseEntity updateProbe(@RequestBody final SpaceProbeDTO spaceProbeDTO) {
+  public ResponseEntity updateProbe(@RequestBody final SpaceProbeRequest spaceProbeRequest) {
     log.info("RECEIVED ON CREATE PROBE METHOD");
-    spaceProbeUseCase.updateProbeLocation(spaceProbeDTO);
+    spaceProbeUseCase.updateProbeLocation(spaceProbeRequest);
     return ResponseEntity.ok().body(spaceProbeUseCase.findAllProbes());
   }
 }

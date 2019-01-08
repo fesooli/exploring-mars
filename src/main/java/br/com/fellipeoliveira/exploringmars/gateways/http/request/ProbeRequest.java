@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProbeDTO {
+public class ProbeRequest {
 
   @NotEmpty(message = "Space Probe Name can not be empty!")
   @NotNull(message = "Space Probe Name can not be null!")

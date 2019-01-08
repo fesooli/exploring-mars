@@ -11,14 +11,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpaceProbeGatewayImpl implements SpaceProbeGateway {
 
-  private Map<String, SpaceProbe> planet = new HashMap<>();
+  private static Map<String, SpaceProbe> planet = new HashMap<>();
 
   @Override
   public List<SpaceProbe> findAllProbes() {
     return planet
-        .entrySet()
+        .keySet()
         .stream()
-        .map(stringSpaceProbeEntry -> planet.get(stringSpaceProbeEntry))
+        .map(key -> planet.get(key))
         .collect(Collectors.toList());
   }
 
