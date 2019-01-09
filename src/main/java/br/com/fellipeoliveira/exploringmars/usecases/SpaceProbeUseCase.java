@@ -9,6 +9,7 @@ import br.com.fellipeoliveira.exploringmars.gateways.http.request.ProbeRequest;
 import br.com.fellipeoliveira.exploringmars.gateways.http.request.SpaceProbeRequest;
 import br.com.fellipeoliveira.exploringmars.gateways.http.response.DirectionResponse;
 import br.com.fellipeoliveira.exploringmars.gateways.http.response.SpaceProbeResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,18 +38,33 @@ public class SpaceProbeUseCase {
     return builderSpaceProbeResponse(spaceProbeGateway.findProbeById(id));
   }
 
-  public void saveProbe(ProbeRequest probeRequest) {
+  public void saveProbe(List<ProbeRequest> probeRequests) {
     final List<SpaceProbe> spaceProbes = spaceProbeGateway.findAllProbes();
-    validationUseCase.execute(probeRequest, spaceProbes);
-    final SpaceProbe spaceProbe = createSpaceProbe(probeRequest.getSpaceProbeName(), spaceProbes);
-    validationUseCase.execute(spaceProbe, spaceProbes);
-    saveProbe(spaceProbe);
+    probeRequests.forEach(
+        probeRequest -> {
+          validationUseCase.execute(probeRequest, spaceProbes);
+          final SpaceProbe spaceProbe =
+              createSpaceProbe(probeRequest.getSpaceProbeName(), spaceProbes);
+          validationUseCase.execute(spaceProbe, spaceProbes);
+          saveProbe(spaceProbe);
+        });
   }
 
-  public void updateProbeLocation(SpaceProbeRequest spaceProbeRequest) {
-    spaceProbeRequest
-        .getTurns()
-        .forEach(turn -> ((Command) context.getBean(turn)).execute(spaceProbeRequest.getProbeId()));
+  public void updateProbeLocation(List<SpaceProbeRequest> spaceProbeRequests) {
+    List<String> turnsWithErrors = new ArrayList<>();
+    spaceProbeRequests.forEach(
+        spaceProbeRequest ->
+            spaceProbeRequest
+                .getTurns()
+                .forEach(
+                    turn -> {
+                      try {
+                        ((Command) context.getBean(turn)).execute(spaceProbeRequest.getProbeId());
+                      } catch (Exception e) {
+                        e.printStackTrace();
+                        turnsWithErrors.add(turn);
+                      }
+                    }));
   }
 
   private void saveProbe(SpaceProbe spaceProbe) {

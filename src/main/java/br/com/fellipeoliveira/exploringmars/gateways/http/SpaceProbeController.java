@@ -5,6 +5,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import br.com.fellipeoliveira.exploringmars.gateways.http.request.ProbeRequest;
 import br.com.fellipeoliveira.exploringmars.gateways.http.request.SpaceProbeRequest;
 import br.com.fellipeoliveira.exploringmars.usecases.SpaceProbeUseCase;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -40,7 +41,7 @@ public class SpaceProbeController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public ResponseEntity createProbe(@RequestBody final ProbeRequest probeRequest) {
+  public ResponseEntity createProbe(@RequestBody final List<ProbeRequest> probeRequest) {
     log.info("RECEIVED ON CREATE PROBE METHOD");
     spaceProbeUseCase.saveProbe(probeRequest);
     return ResponseEntity.ok().body(spaceProbeUseCase.findAllProbes());
@@ -48,8 +49,8 @@ public class SpaceProbeController {
 
   @PutMapping
   @ResponseStatus(HttpStatus.OK)
-  public ResponseEntity updateProbe(@RequestBody final SpaceProbeRequest spaceProbeRequest) {
-    log.info("RECEIVED ON CREATE PROBE METHOD");
+  public ResponseEntity updateProbe(@RequestBody final List<SpaceProbeRequest> spaceProbeRequest) {
+    log.info("RECEIVED ON UPDATE PROBE METHOD");
     spaceProbeUseCase.updateProbeLocation(spaceProbeRequest);
     return ResponseEntity.ok().body(spaceProbeUseCase.findAllProbes());
   }
