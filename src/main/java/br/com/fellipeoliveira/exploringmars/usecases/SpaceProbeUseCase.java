@@ -3,7 +3,7 @@ package br.com.fellipeoliveira.exploringmars.usecases;
 import br.com.fellipeoliveira.exploringmars.config.PlanetConfig;
 import br.com.fellipeoliveira.exploringmars.domains.Direction;
 import br.com.fellipeoliveira.exploringmars.domains.SpaceProbe;
-import br.com.fellipeoliveira.exploringmars.exceptions.PlanetLimitAreaValidationException;
+import br.com.fellipeoliveira.exploringmars.exceptions.PositionValidationException;
 import br.com.fellipeoliveira.exploringmars.gateways.SpaceProbeGateway;
 import br.com.fellipeoliveira.exploringmars.gateways.http.request.ProbeRequest;
 import br.com.fellipeoliveira.exploringmars.gateways.http.request.SpaceProbeRequest;
@@ -39,9 +39,9 @@ public class SpaceProbeUseCase {
   }
 
   public void saveProbe(List<ProbeRequest> probeRequests) {
-    final List<SpaceProbe> spaceProbes = spaceProbeGateway.findAllProbes();
     probeRequests.forEach(
         probeRequest -> {
+          final List<SpaceProbe> spaceProbes = spaceProbeGateway.findAllProbes();
           validationUseCase.execute(probeRequest, spaceProbes);
           final SpaceProbe spaceProbe =
               createSpaceProbe(probeRequest.getSpaceProbeName(), spaceProbes);
@@ -50,21 +50,27 @@ public class SpaceProbeUseCase {
         });
   }
 
-  public void updateProbeLocation(List<SpaceProbeRequest> spaceProbeRequests) {
-    List<String> turnsWithErrors = new ArrayList<>();
+  public List<SpaceProbeResponse> updateProbeLocation(List<SpaceProbeRequest> spaceProbeRequests) {
+    List<SpaceProbeResponse> listSpaceProbeResponse = new ArrayList<>();
     spaceProbeRequests.forEach(
-        spaceProbeRequest ->
-            spaceProbeRequest
-                .getTurns()
-                .forEach(
-                    turn -> {
-                      try {
-                        ((Command) context.getBean(turn)).execute(spaceProbeRequest.getProbeId());
-                      } catch (Exception e) {
-                        e.printStackTrace();
-                        turnsWithErrors.add(turn);
-                      }
-                    }));
+        spaceProbeRequest -> {
+          List<String> commandsWithErrors = new ArrayList<>();
+          spaceProbeRequest
+              .getCommands()
+              .forEach(
+                  command -> {
+                    try {
+                      ((Command) context.getBean(command)).execute(spaceProbeRequest.getProbeId());
+                    } catch (Exception e) {
+                      e.printStackTrace();
+                      commandsWithErrors.add(command);
+                    }
+                  });
+          SpaceProbeResponse spaceProbeResponse = findProbeById(spaceProbeRequest.getProbeId());
+          spaceProbeResponse.setCommandsWithError(commandsWithErrors);
+          listSpaceProbeResponse.add(spaceProbeResponse);
+        });
+    return listSpaceProbeResponse;
   }
 
   private void saveProbe(SpaceProbe spaceProbe) {
@@ -72,21 +78,24 @@ public class SpaceProbeUseCase {
   }
 
   private Direction findValidProbeLocationInPlanet(List<SpaceProbe> spaceProbes) {
-    int positionY = 0;
-    int positionX = 0;
+    int positionY = 0, positionX;
 
-    for (int i = 0; i < spaceProbes.size(); i++) {
-      if (positionX <= planetConfig.getMaxPositionX()) {
-        if (spaceProbes.get(i).getDirection().getPositionY() == positionY) {
-          if (spaceProbes.get(i).getDirection().getPositionX() == positionX) {
-            positionX += planetConfig.getDistancePositions();
-          } else {
-            break;
-          }
-        }
-      } else {
-        throw new PlanetLimitAreaValidationException("Foi excedido o limite máximo de X.");
-      }
+    List<Integer> permitedXPositions = new ArrayList<>();
+    for (int i = 0; i < planetConfig.getMaxPositionX(); i++) {
+      permitedXPositions.add(i);
+    }
+
+    spaceProbes
+        .stream()
+        .filter(spaceProbe -> spaceProbe.getDirection().getPositionY() == positionY)
+        .map(spaceProbe -> spaceProbe.getDirection().getPositionX())
+        .sorted()
+        .forEach(position -> permitedXPositions.remove(position));
+
+    if (permitedXPositions.stream().findFirst().isPresent()) {
+      positionX = permitedXPositions.stream().findFirst().get();
+    } else {
+      throw new PositionValidationException("X limit reached.");
     }
 
     return Direction.builder()

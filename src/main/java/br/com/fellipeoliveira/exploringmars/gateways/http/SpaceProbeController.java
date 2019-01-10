@@ -51,7 +51,6 @@ public class SpaceProbeController {
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity updateProbe(@RequestBody final List<SpaceProbeRequest> spaceProbeRequest) {
     log.info("RECEIVED ON UPDATE PROBE METHOD");
-    spaceProbeUseCase.updateProbeLocation(spaceProbeRequest);
-    return ResponseEntity.ok().body(spaceProbeUseCase.findAllProbes());
+    return ResponseEntity.ok().body(spaceProbeUseCase.updateProbeLocation(spaceProbeRequest));
   }
 }

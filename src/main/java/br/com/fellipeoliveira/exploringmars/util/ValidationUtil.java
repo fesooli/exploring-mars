@@ -28,11 +28,4 @@ public class ValidationUtil {
       throw new BusinessValidationException(violation.getMessage());
     }
   }
-
-//  public void validate(DirectionDTO directionDTO) {
-//    Set<ConstraintViolation<DirectionDTO>> violations = validator.validate(directionDTO);
-//    for (ConstraintViolation<DirectionDTO> violation : violations) {
-//      throw new BusinessValidationException(violation.getMessage());
-//    }
-//  }
 }

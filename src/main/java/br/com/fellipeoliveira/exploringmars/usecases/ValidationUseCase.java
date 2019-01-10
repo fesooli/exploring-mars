@@ -20,8 +20,6 @@ public class ValidationUseCase {
   private final PlanetConfig planetConfig;
 
   public void execute(SpaceProbe spaceProbe, List<SpaceProbe> spaceProbes) {
-    // validationUtil.validate(spaceProbe);
-    // validationUtil.validate(spaceProbeRequest.getDirectionDTO());
     validatePosition(spaceProbes, spaceProbe);
     validateLimitPositions(spaceProbe);
   }
@@ -34,7 +32,7 @@ public class ValidationUseCase {
   private void validateMaximumNumberOfProbes(List<SpaceProbe> spaceProbes) {
     if (spaceProbes.size() == planetConfig.getMaxNumberOfProbes()) {
       throw new MaxNumberOfProbesValidationException(
-          "O limite máximo de sondas ao mesmo tempo é " + planetConfig.getMaxNumberOfProbes());
+          "The maximum limit of probes at the same time is " + planetConfig.getMaxNumberOfProbes());
     }
   }
 
@@ -43,15 +41,16 @@ public class ValidationUseCase {
         .stream()
         .filter(
             spaceProbeRequest ->
-                !spaceProbeRequest.getProbeId().equalsIgnoreCase(spaceProbe.getProbeId())
-                    && spaceProbeRequest.getDirection().getPositionX()
-                        == spaceProbe.getDirection().getPositionX()
-                    && spaceProbeRequest.getDirection().getPositionY()
-                        == spaceProbe.getDirection().getPositionY())
+                (!spaceProbeRequest.getProbeId().equalsIgnoreCase(spaceProbe.getProbeId())
+                    && ((spaceProbeRequest.getDirection().getPositionX()
+                            == spaceProbe.getDirection().getPositionX())
+                        && (spaceProbeRequest.getDirection().getPositionY()
+                            == spaceProbe.getDirection().getPositionY()))))
         .findFirst()
         .ifPresent(
             spaceProbeRequest -> {
-              throw new PositionValidationException("Já existe uma sonda nessa posição de X, Y.");
+              throw new PositionValidationException(
+                  "There is already a probe at this position of X, Y.");
             });
   }
 
@@ -61,7 +60,7 @@ public class ValidationUseCase {
         || (spaceProbe.getDirection().getPositionX() > planetConfig.getMaxPositionX()
             || spaceProbe.getDirection().getPositionY() > planetConfig.getMaxPositionY())) {
       throw new PositionValidationException(
-          "Os limites minimos de X e Y foram ultrapassados. X="
+          "The minimum limits of X and Y have been exceeded. X="
               + spaceProbe.getDirection().getPositionX()
               + ", Y="
               + spaceProbe.getDirection().getPositionY());

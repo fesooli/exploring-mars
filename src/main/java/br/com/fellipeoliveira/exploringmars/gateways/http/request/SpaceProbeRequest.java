@@ -18,8 +18,7 @@ public class SpaceProbeRequest {
   @NotNull(message = "Probe ID can not be null!")
   private String probeId;
 
-  @NotEmpty(message = "PositionX can not be empty!")
-  @NotNull(message = "PositionX can not be null!")
-  private List<String> turns;
+  @NotNull(message = "Commands can not be null!")
+  private List<String> commands;
 
 }
