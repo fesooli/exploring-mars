@@ -12,5 +12,4 @@ public class PlanetConfig {
   private int maxNumberOfProbes;
   private int maxPositionX;
   private int maxPositionY;
-  private int distancePositions;
 }

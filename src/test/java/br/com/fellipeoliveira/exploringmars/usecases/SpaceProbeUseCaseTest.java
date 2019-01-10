@@ -27,7 +27,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationContext;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class SpaceProbeUseCaseTest {
 
   @InjectMocks private SpaceProbeUseCase spaceProbeUseCase;
@@ -35,8 +35,6 @@ public class SpaceProbeUseCaseTest {
   @Mock private SpaceProbeGateway spaceProbeGateway;
 
   @Mock private ValidationUseCase validationUseCase;
-
-  @Mock private ValidationUtil validationUtil;
 
   @Mock private PlanetConfig planetConfig;
 
