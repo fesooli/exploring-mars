@@ -5,6 +5,7 @@ import br.com.fellipeoliveira.exploringmars.domains.SpaceProbe;
 import br.com.fellipeoliveira.exploringmars.exceptions.MaxNumberOfProbesValidationException;
 import br.com.fellipeoliveira.exploringmars.exceptions.PositionValidationException;
 import br.com.fellipeoliveira.exploringmars.gateways.http.request.ProbeRequest;
+import br.com.fellipeoliveira.exploringmars.gateways.http.request.SpaceProbeRequest;
 import br.com.fellipeoliveira.exploringmars.util.ValidationUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,10 @@ public class ValidationUseCase {
 
   private final ValidationUtil validationUtil;
   private final PlanetConfig planetConfig;
+
+  public void execute(SpaceProbeRequest spaceProbeRequest) {
+    validationUtil.validate(spaceProbeRequest);
+  }
 
   public void execute(SpaceProbe spaceProbe, List<SpaceProbe> spaceProbes) {
     validatePosition(spaceProbes, spaceProbe);

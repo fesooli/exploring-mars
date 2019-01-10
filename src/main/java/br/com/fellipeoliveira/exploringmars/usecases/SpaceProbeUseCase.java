@@ -3,6 +3,7 @@ package br.com.fellipeoliveira.exploringmars.usecases;
 import br.com.fellipeoliveira.exploringmars.config.PlanetConfig;
 import br.com.fellipeoliveira.exploringmars.domains.Direction;
 import br.com.fellipeoliveira.exploringmars.domains.SpaceProbe;
+import br.com.fellipeoliveira.exploringmars.exceptions.BusinessValidationException;
 import br.com.fellipeoliveira.exploringmars.exceptions.PositionValidationException;
 import br.com.fellipeoliveira.exploringmars.gateways.SpaceProbeGateway;
 import br.com.fellipeoliveira.exploringmars.gateways.http.request.ProbeRequest;
@@ -54,13 +55,18 @@ public class SpaceProbeUseCase {
     List<SpaceProbeResponse> listSpaceProbeResponse = new ArrayList<>();
     spaceProbeRequests.forEach(
         spaceProbeRequest -> {
+          validationUseCase.execute(spaceProbeRequest);
           List<String> commandsWithErrors = new ArrayList<>();
           spaceProbeRequest
               .getCommands()
               .forEach(
                   command -> {
+                    SpaceProbe spaceProbe = spaceProbeGateway.findProbeById(spaceProbeRequest.getProbeId());
+                    if(spaceProbe == null) {
+                      throw new BusinessValidationException("SpaceProbeRequest object with ID " + spaceProbeRequest.getProbeId() + " was not found.");
+                    }
                     try {
-                      ((Command) context.getBean(command)).execute(spaceProbeRequest.getProbeId());
+                      ((Command) context.getBean(command)).execute(spaceProbe);
                     } catch (Exception e) {
                       e.printStackTrace();
                       commandsWithErrors.add(command);

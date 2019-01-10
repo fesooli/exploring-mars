@@ -20,6 +20,10 @@ public class ValidationUtil {
     for (ConstraintViolation<SpaceProbeRequest> violation : violations) {
       throw new BusinessValidationException(violation.getMessage());
     }
+
+    if(spaceProbeRequest.getCommands() == null || spaceProbeRequest.getCommands().isEmpty()) {
+      throw new BusinessValidationException("Commands field on SpaceProbeRequest Object can not be null or empty!");
+    }
   }
 
   public void validate(ProbeRequest probeRequest) {

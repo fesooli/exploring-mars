@@ -17,8 +17,7 @@ public class MoveCommand implements Command {
   private final ValidationUseCase validationUseCase;
 
   @Override
-  public void execute(String id) {
-    SpaceProbe spaceProbe = spaceProbeGateway.findProbeById(id);
+  public void execute(SpaceProbe spaceProbe) {
     SpaceProbe spaceProbeCopy =
         SpaceProbe.builder()
             .probeId(spaceProbe.getProbeId())

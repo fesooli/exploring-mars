@@ -15,8 +15,7 @@ public class RightCommand implements Command {
   private final SpaceProbeGateway spaceProbeGateway;
 
   @Override
-  public void execute(String id) {
-    SpaceProbe spaceProbe = spaceProbeGateway.findProbeById(id);
+  public void execute(SpaceProbe spaceProbe) {
     log.info("Space Before: {}", spaceProbe);
     spaceProbe
         .getDirection()
