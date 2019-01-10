@@ -61,14 +61,17 @@ public class SpaceProbeUseCase {
               .getCommands()
               .forEach(
                   command -> {
-                    SpaceProbe spaceProbe = spaceProbeGateway.findProbeById(spaceProbeRequest.getProbeId());
-                    if(spaceProbe == null) {
-                      throw new BusinessValidationException("SpaceProbeRequest object with ID " + spaceProbeRequest.getProbeId() + " was not found.");
+                    SpaceProbe spaceProbe =
+                        spaceProbeGateway.findProbeById(spaceProbeRequest.getProbeId());
+                    if (spaceProbe == null) {
+                      throw new BusinessValidationException(
+                          "SpaceProbeRequest object with ID "
+                              + spaceProbeRequest.getProbeId()
+                              + " was not found.");
                     }
                     try {
                       ((Command) context.getBean(command)).execute(spaceProbe);
                     } catch (Exception e) {
-                      e.printStackTrace();
                       commandsWithErrors.add(command);
                     }
                   });
