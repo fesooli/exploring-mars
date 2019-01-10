@@ -1,6 +1,7 @@
 package br.com.fellipeoliveira.exploringmars.gateways.impl;
 
 import br.com.fellipeoliveira.exploringmars.domains.SpaceProbe;
+import br.com.fellipeoliveira.exploringmars.exceptions.BusinessValidationException;
 import br.com.fellipeoliveira.exploringmars.gateways.SpaceProbeGateway;
 import java.util.HashMap;
 import java.util.List;
@@ -15,11 +16,7 @@ public class SpaceProbeGatewayImpl implements SpaceProbeGateway {
 
   @Override
   public List<SpaceProbe> findAllProbes() {
-    return planet
-        .keySet()
-        .stream()
-        .map(key -> planet.get(key))
-        .collect(Collectors.toList());
+    return planet.keySet().stream().map(key -> planet.get(key)).collect(Collectors.toList());
   }
 
   @Override
@@ -28,18 +25,15 @@ public class SpaceProbeGatewayImpl implements SpaceProbeGateway {
   }
 
   @Override
-  public void saveProbe(SpaceProbe spaceProbe) {
-    planet.put(spaceProbe.getProbeId(), spaceProbe);
+  public void deleteProbeById(String id) {
+    if(planet.get(id) == null) {
+      throw new BusinessValidationException(id + ", ID not found to delete");
+    }
+    planet.remove(id);
   }
 
   @Override
-  public void updateProbeDirection(SpaceProbe spaceProbe) {
-    SpaceProbe spaceProbeToUpdate = planet.get(spaceProbe.getProbeId());
-    spaceProbeToUpdate
-        .getDirection()
-        .setProbeDirection(spaceProbe.getDirection().getProbeDirection());
-    spaceProbeToUpdate.getDirection().setPositionX(spaceProbe.getDirection().getPositionX());
-    spaceProbeToUpdate.getDirection().setPositionY(spaceProbe.getDirection().getPositionY());
-    planet.replace(spaceProbe.getProbeId(), spaceProbeToUpdate);
+  public void saveProbe(SpaceProbe spaceProbe) {
+    planet.put(spaceProbe.getProbeId(), spaceProbe);
   }
 }

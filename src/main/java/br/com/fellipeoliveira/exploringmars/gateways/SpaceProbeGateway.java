@@ -9,8 +9,8 @@ public interface SpaceProbeGateway {
 
   SpaceProbe findProbeById(String id);
 
-  void saveProbe(SpaceProbe spaceProbe);
+  void deleteProbeById(String id);
 
-  void updateProbeDirection(SpaceProbe spaceProbe);
+  void saveProbe(SpaceProbe spaceProbe);
 
 }

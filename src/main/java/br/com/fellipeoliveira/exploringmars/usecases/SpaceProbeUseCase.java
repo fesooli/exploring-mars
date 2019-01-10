@@ -39,6 +39,10 @@ public class SpaceProbeUseCase {
     return builderSpaceProbeResponse(spaceProbeGateway.findProbeById(id));
   }
 
+  public void deleteProbeById(String id) {
+    spaceProbeGateway.deleteProbeById(id);
+  }
+
   public void saveProbe(List<ProbeRequest> probeRequests) {
     probeRequests.forEach(
         probeRequest -> {
