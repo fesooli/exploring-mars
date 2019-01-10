@@ -76,6 +76,7 @@ public class SpaceProbeUseCase {
                     try {
                       ((Command) context.getBean(command)).execute(spaceProbe);
                     } catch (Exception e) {
+                      e.printStackTrace();
                       commandsWithErrors.add(command);
                     }
                   });

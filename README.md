@@ -91,7 +91,7 @@ Response
 ```
 [
     {
-        "probeId": "c21b1fc1-3511-423a-8ffd-788093e50172",
+        "probeId": "274e27d9-2709-482b-800f-b2dcd413527d",
         "spaceProbeName": "Galactus3",
         "directionResponse": {
             "positionX": 1,
@@ -101,7 +101,7 @@ Response
         "commandsWithError": null
     },
     {
-        "probeId": "107d998f-99c6-4f7b-b33f-70f66e7e730a",
+        "probeId": "d5794366-ec3a-46db-9dea-1840fbc7c89e",
         "spaceProbeName": "Galactus2",
         "directionResponse": {
             "positionX": 0,
@@ -121,10 +121,10 @@ PUT http://localhost:8080/probe
 
 ```
 [{
-    "probeId": "c21b1fc1-3511-423a-8ffd-788093e50172",
+    "probeId": "d5794366-ec3a-46db-9dea-1840fbc7c89e",
     "commands": ["M","R","M"]
 }, {
-	"probeId": "107d998f-99c6-4f7b-b33f-70f66e7e730a",
+	"probeId": "274e27d9-2709-482b-800f-b2dcd413527d",
     "commands": ["M","R","M","M", "M","L","M"]
 }]
 ```
@@ -134,24 +134,24 @@ Response
 ```
 [
     {
-        "probeId": "c21b1fc1-3511-423a-8ffd-788093e50172",
-        "spaceProbeName": "Galactus3",
-        "directionResponse": {
-            "positionX": 1,
-            "positionY": 0,
-            "probeDirection": "N"
-        },
-        "commandsWithError": null
-    },
-    {
-        "probeId": "107d998f-99c6-4f7b-b33f-70f66e7e730a",
+        "probeId": "d5794366-ec3a-46db-9dea-1840fbc7c89e",
         "spaceProbeName": "Galactus2",
         "directionResponse": {
-            "positionX": 0,
-            "positionY": 0,
+            "positionX": 1,
+            "positionY": 3,
             "probeDirection": "N"
         },
-        "commandsWithError": null
+        "commandsWithError": []
+    },
+    {
+        "probeId": "274e27d9-2709-482b-800f-b2dcd413527d",
+        "spaceProbeName": "Galactus3",
+        "directionResponse": {
+            "positionX": 6,
+            "positionY": 2,
+            "probeDirection": "E"
+        },
+        "commandsWithError": []
     }
 ]
 ```
@@ -161,6 +161,6 @@ Response
 Request
 
 ```
-DELETE http://localhost:8080/probe/107d998f-99c6-4f7b-b33f-70f66e7e730a
+DELETE http://localhost:8080/probe/d5794366-ec3a-46db-9dea-1840fbc7c89e
 ```
 
